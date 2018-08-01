@@ -8,7 +8,7 @@ However unfortunatly Keras ImageDataGenerator not yet support Multi Labeled Data
 
 meaning of Multi Labeled Dataset is that one data has multiple labels.
 
-<img src='https://www.google.co.kr/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwios7G9ksvcAhUNhrwKHVIBBzoQjRx6BAgBEAU&url=https%3A%2F%2Fpixabay.com%2Fen%2Ffire-smoke-sunset-red-disaster-1265716%2F&psig=AOvVaw3OBucSiEn7rI-Gd4fQcnsU&ust=1533188470008456'>
+<img src='https://cdn.pixabay.com/photo/2016/03/18/20/13/fire-1265716_1280.jpg'>
 for example, above image data have two labels which was fire and smoke.
 
 for supporting Multi Labeled Dataset on Image Data Generator, i modified some part of keras.preprocessing.image
