@@ -14,7 +14,7 @@ for example, above image data have two labels which was fire and smoke.
 for supporting Multi Labeled Dataset on Image Data Generator, i modified some part of keras.preprocessing.image
 
 ## How to use?
-import utils to your ython script
+import utils to your python script
 
 ```python
 from utils import *
@@ -38,7 +38,7 @@ make data file structure like bellow(Fire-Smoke forlder have multi labeled image
 
 then, setting parameter class_mode to "multi_categorical" in function "flow_from_directory"
 
-if subdirectory have some seperator("-"), this utils will automatically identify that this subdirectory is multi labeled class and provide multi label to this class 
+if subdirectory have some seperator("-"), this utils will automatically identify that this subdirectory is multi labeled class 
 
 ## Test ImageDataGenerator for Multi Labeled Dataset
 first modify igd_test.py
