@@ -13,6 +13,7 @@ import warnings
 import multiprocessing.pool
 from functools import partial
 
+import keras
 from keras_preprocessing import get_keras_submodule
 
 backend = get_keras_submodule('backend')
@@ -1637,14 +1638,19 @@ class DirectoryIterator(Iterator):
         # First, count the number of samples and classes.
         self.samples = 0
 
+        self.contain_bg = False
         if not classes:
             classes = []
+            bg = []
             if self.class_mode == 'multi_categorical':
-                multilabel_classes = [] # for multi labeled classes
+                multilabel_classes = []  # for multi labeled classes
                 for subdir in sorted(os.listdir(directory)):
                     if os.path.isdir(os.path.join(directory, subdir)):
                         if len(subdir.split("-")) > 1:
                             multilabel_classes.append(subdir)
+                        elif subdir == 'Bg':
+                            bg.append(subdir)
+                            self.contain_bg = True
                         else:
                             classes.append(subdir)
             else:
@@ -1658,7 +1664,7 @@ class DirectoryIterator(Iterator):
                     if label not in classes:
                         classes = classes + [label]
 
-            classes = classes + multilabel_classes
+            classes = bg + classes + multilabel_classes
 
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
@@ -1681,8 +1687,13 @@ class DirectoryIterator(Iterator):
                                      for subdir in classes)))
 
         if self.class_mode == 'multi_categorical':
-            print('Found %d images belonging to %d classes containing %d multi classes.' %
-                  (self.samples, self.num_classes, self.num_multilabel_classes))
+            if self.contain_bg:
+                print('Found %d images belonging to %d classes containing %d multi classes and 1 bg' %
+                      (self.samples, self.num_classes, self.num_multilabel_classes))
+            else:
+                print('Found %d images belonging to %d classes containing %d multi classes.' %
+                      (self.samples, self.num_classes, self.num_multilabel_classes))
+
         else:
             print('Found %d images belonging to %d classes.' %
                   (self.samples, self.num_classes))
@@ -1755,17 +1766,34 @@ class DirectoryIterator(Iterator):
             for i, label in enumerate(self.classes[index_array]):
                 batch_y[i, label] = 1.
         elif self.class_mode == 'multi_categorical':
-            batch_y = np.zeros(
-                (len(batch_x), self.num_classes - self.num_multilabel_classes),
-                dtype=backend.floatx())
-            for i, label in enumerate(self.classes[index_array]):
-                if label in self.multilabel_class_indices.keys():
-                    multi_classes = self.multilabel_class_indices[label].split("-")
+            # generate multi labels
+            if self.contain_bg:
+                batch_y = np.zeros(
+                    (len(batch_x), self.num_classes - self.num_multilabel_classes - 1),  # delete bg class
+                    dtype=backend.floatx())
 
-                    for multi_label in multi_classes:
-                        batch_y[i, self.class_indices[multi_label]] = 1
-                else:
-                    batch_y[i, label] = 1.
+                for i, label in enumerate(self.classes[index_array]):
+                    if label in self.multilabel_class_indices.keys():
+                        multi_classes = self.multilabel_class_indices[label].split("-")
+                        for multi_label in multi_classes:
+                            batch_y[i, self.class_indices[multi_label] - 1] = 1
+                    elif label != 0:
+                        batch_y[i, label - 1] = 1.
+                    else:
+                        batch_y[i, label] = 0.
+            else:
+                batch_y = np.zeros(
+                    (len(batch_x), self.num_classes - self.num_multilabel_classes),
+                    dtype=backend.floatx())
+
+                for i, label in enumerate(self.classes[index_array]):
+                    if label in self.multilabel_class_indices.keys():
+                        multi_classes = self.multilabel_class_indices[label].split("-")
+
+                        for multi_label in multi_classes:
+                            batch_y[i, self.class_indices[multi_label]] = 1
+                    else:
+                        batch_y[i, label] = 1.
         else:
             return batch_x
         return batch_x, batch_y
