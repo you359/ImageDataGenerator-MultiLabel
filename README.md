@@ -22,7 +22,7 @@ from utils import *
 
 this utils.py file almost same with keras.preprocessing.image without some function
 
-make data file structure like bellow(Fire-Smoke forlder have multi labeled images)
+make data file structure like bellow(Fire-Smoke folder have multi labeled images)
 
 ```
 ├── Fire(folder)
@@ -33,12 +33,17 @@ make data file structure like bellow(Fire-Smoke forlder have multi labeled image
 │   └── ...
 ├── Fire-Smoke(folder)
 │   └── XXX-1.jpeg
-│   └── ...hav
+│   └── ...
+├── Bg(folder) # if you want
+│   └── XXX-1.jpeg
+│   └── ...
 ```
 
-then, setting parameter class_mode to "multi_categorical" in function "flow_from_directory"
+if you add 'Bg' folder, ImageDataGenerator(with multi-categorical) consider this folder with class 0
 
-if subdirectory have some seperator("-"), this utils will automatically identify that this subdirectory is multi labeled class 
+then, setting parameter 'class_mode' to "multi_categorical" in function "flow_from_directory"
+
+if subdirectory have some seperator("-"), this utils will automatically identify whether this subdirectory is multi labeled class or not 
 
 ## Test ImageDataGenerator for Multi Labeled Dataset
 first modify igd_test.py
